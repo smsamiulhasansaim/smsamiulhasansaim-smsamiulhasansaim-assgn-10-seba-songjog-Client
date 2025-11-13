@@ -21,7 +21,7 @@ import {
 import { Link, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { logoutUser } from '../../firebase/functions/authService';
-import '../../assets/Navbar.css';
+import '../../assets/styles/Navbar.css';
 
 // Component authored by: S M Samiul Hasan
 const Navbar = () => {
