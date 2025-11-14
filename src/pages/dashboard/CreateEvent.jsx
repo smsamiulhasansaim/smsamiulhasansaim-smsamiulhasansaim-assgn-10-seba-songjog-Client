@@ -353,7 +353,7 @@ const CreateEvent = () => {
 
       console.log('Submitting event data:', finalEventData);
 
-      const eventResponse = await fetch('http://localhost:3000/api/events', {
+      const eventResponse = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
