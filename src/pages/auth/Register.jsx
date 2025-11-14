@@ -169,7 +169,7 @@ const Register = () => {
         setSuccess(true);
         
         setTimeout(() => {
-          window.location.href = '/Home';
+          window.location.href = '/';
         }, 2000);
       } else if (result) {
         setErrors({ submit: result.error });
