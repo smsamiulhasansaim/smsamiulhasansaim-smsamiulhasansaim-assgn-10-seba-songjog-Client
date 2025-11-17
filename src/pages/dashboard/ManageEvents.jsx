@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // SweetAlert2 ইমপোর্ট করা হয়েছে
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
@@ -36,6 +37,14 @@ const ManageEvents = () => {
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "bg-green-600 text-white px-4 py-2 rounded-md ml-2 hover:bg-green-700 font-medium",
+      cancelButton: "bg-red-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-red-700 font-medium"
+    },
+    buttonsStyling: false
+  });
 
   useEffect(() => {
     fetchEvents();
@@ -113,55 +122,103 @@ const ManageEvents = () => {
     );
   };
 
-  const handleDeleteEvents = async () => {
+  // Multiple Event Delete Handler
+  const handleDeleteEvents = () => {
     if (selectedEvents.length === 0) return;
     
-    if (window.confirm(`Are you sure you want to delete ${selectedEvents.length} event(s)?`)) {
-      try {
-        setProcessing(true);
-        
-        const deletePromises = selectedEvents.map(eventId => 
-          fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
-            method: 'DELETE'
-          })
-        );
-        
-        await Promise.all(deletePromises);
-        
-        await fetchEvents();
-        setSelectedEvents([]);
-        
-        alert('Events deleted successfully!');
-      } catch (err) {
-        alert('Error deleting events. Please try again.');
-      } finally {
-        setProcessing(false);
+    swalWithBootstrapButtons.fire({
+      title: "Are you sure?",
+      text: `You won't be able to revert deleting ${selectedEvents.length} event(s)!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete them!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setProcessing(true);
+          const deletePromises = selectedEvents.map(eventId => 
+            fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
+              method: 'DELETE'
+            })
+          );
+          
+          await Promise.all(deletePromises);
+          await fetchEvents();
+          setSelectedEvents([]);
+          
+          swalWithBootstrapButtons.fire({
+            title: "Deleted!",
+            text: "Events have been deleted.",
+            icon: "success"
+          });
+        } catch (err) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'Error deleting events. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          });
+        } finally {
+          setProcessing(false);
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire({
+          title: "Cancelled",
+          text: "Your events are safe :)",
+          icon: "error"
+        });
       }
-    }
+    });
   };
 
-  const handleDeleteSingleEvent = async (eventId, eventTitle) => {
-    if (window.confirm(`Are you sure you want to delete "${eventTitle}"?`)) {
-      try {
-        setProcessing(true);
-        
-        const response = await fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
-          method: 'DELETE'
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to delete event');
+  // Single Event Delete Handler
+  const handleDeleteSingleEvent = (eventId, eventTitle) => {
+    swalWithBootstrapButtons.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setProcessing(true);
+          const response = await fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
+            method: 'DELETE'
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to delete event');
+          }
+          
+          await fetchEvents();
+          
+          swalWithBootstrapButtons.fire({
+            title: "Deleted!",
+            text: "Your event has been deleted.",
+            icon: "success"
+          });
+        } catch (err) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'Error deleting event. Please try again.',
+            icon: 'error'
+          });
+        } finally {
+          setProcessing(false);
         }
-        
-        await fetchEvents();
-        
-        alert('Event deleted successfully!');
-      } catch (err) {
-        alert('Error deleting event. Please try again.');
-      } finally {
-        setProcessing(false);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        swalWithBootstrapButtons.fire({
+          title: "Cancelled",
+          text: "Your event is safe :)",
+          icon: "error"
+        });
       }
-    }
+    });
   };
 
   const handleDuplicateEvent = async (eventId) => {
@@ -221,15 +278,27 @@ const ManageEvents = () => {
       await fetchEvents();
       setActiveTab('draft');
       
-      alert('Event duplicated successfully!');
+      Swal.fire({
+        title: 'Success!',
+        text: 'Event duplicated successfully!',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
     } catch (err) {
-      alert('Error duplicating event. Please try again.');
+      Swal.fire({
+        title: 'Error!',
+        text: 'Error duplicating event. Please try again.',
+        icon: 'error'
+      });
     } finally {
       setProcessing(false);
     }
   };
 
   const handleExportData = () => {
+    // Export implementation
   };
 
   const handleEditEvent = (eventId) => {
