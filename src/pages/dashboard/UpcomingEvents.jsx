@@ -37,23 +37,35 @@ const UpcomingEvents = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
+        const response = await fetch('http://localhost:5000/api/events');
         
         if (!response.ok) {
           throw new Error('Failed to fetch events');
         }
         
-        const eventsData = await response.json();
+        const data = await response.json();
+        let eventsData = [];
+        
+        if (data.data && Array.isArray(data.data)) {
+          eventsData = data.data;
+        } else if (data.events && Array.isArray(data.events)) {
+          eventsData = data.events;
+        } else if (Array.isArray(data)) {
+          eventsData = data;
+        } else if (typeof data === 'object' && data !== null) {
+          eventsData = [data];
+        } else {
+          throw new Error('Invalid data format received from API');
+        }
         
         const normalizedEvents = eventsData.map(event => ({
-          id: event._id || event.id,
+          id: event.eventId || event._id,
           ...event
         }));
         
         setEvents(normalizedEvents);
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching events:', err);
       } finally {
         setLoading(false);
       }
@@ -386,7 +398,7 @@ const UpcomingEvents = () => {
 };
 
 const EventCard = ({ event, onViewDetails, getCategoryColor, getVolunteerProgress }) => {
-  const [setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.div 
@@ -396,14 +408,34 @@ const EventCard = ({ event, onViewDetails, getCategoryColor, getVolunteerProgres
       onHoverEnd={() => setIsHovered(false)}
     >
       <motion.div 
-        className="h-48 bg-gradient-to-br from-green-400 to-blue-500 relative cursor-pointer overflow-hidden"
+        className="h-48 relative cursor-pointer overflow-hidden"
         onClick={() => onViewDetails(event.id)}
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.3 }}
       >
+        {/* Image Rendering Logic */}
+        {event.images && event.images.length > 0 ? (
+          <img 
+            src={event.images[0]} 
+            alt={event.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+
+        {/* Fallback Gradient */}
+        <div 
+          className={`absolute inset-0 bg-gradient-to-br from-green-400 to-blue-500 ${
+            event.images && event.images.length > 0 ? 'hidden' : 'block'
+          }`}
+        ></div>
+
         {event.verified && (
           <motion.div 
-            className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center"
+            className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center z-10"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2 }}
@@ -414,7 +446,7 @@ const EventCard = ({ event, onViewDetails, getCategoryColor, getVolunteerProgres
         )}
         {(event.rating || 0) >= 4.5 && (
           <motion.div 
-            className="absolute top-3 left-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center"
+            className="absolute top-3 left-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center z-10"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3 }}
@@ -424,7 +456,7 @@ const EventCard = ({ event, onViewDetails, getCategoryColor, getVolunteerProgres
           </motion.div>
         )}
         <motion.div 
-          className="absolute bottom-3 left-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs"
+          className="absolute bottom-3 left-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs z-10"
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}

@@ -1,10 +1,3 @@
-/**
- * @author: S M Samiul Hasan
- * @file: LeaderBoard.jsx
- * @description: This React component displays a community leaderboard for volunteers.
- * All rights reserved by S M Samiul Hasan.
- */
-
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {

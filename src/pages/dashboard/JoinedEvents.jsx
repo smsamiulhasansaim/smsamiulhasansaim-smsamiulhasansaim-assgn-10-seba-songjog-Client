@@ -1,4 +1,3 @@
-// JoinedEvents Component - Created by S M Samiul Hasan
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -36,14 +35,17 @@ const JoinedEvents = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
+        const response = await fetch('http://localhost:5000/api/events');
         
         if (!response.ok) {
           throw new Error('Failed to fetch events');
         }
         
-        const allEvents = await response.json();
+        const responseData = await response.json();
         
+        const allEvents = Array.isArray(responseData) 
+          ? responseData 
+          : (responseData.data || responseData.events || []);
 
         const today = new Date();
         const transformedEvents = {
@@ -82,7 +84,6 @@ const JoinedEvents = () => {
         setJoinedEvents(transformedEvents);
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching joined events:', err);
       } finally {
         setLoading(false);
       }
@@ -93,9 +94,6 @@ const JoinedEvents = () => {
 
   const toggleReminder = async (eventId) => {
     try {
-
-      console.log('Toggling reminder for event:', eventId);
-
       setJoinedEvents(prev => ({
         ...prev,
         upcoming: prev.upcoming.map(event => 
@@ -105,15 +103,12 @@ const JoinedEvents = () => {
         )
       }));
     } catch (err) {
-      console.error('Error toggling reminder:', err);
     }
   };
 
   const leaveEvent = async (eventId) => {
     if (window.confirm('Are you sure you want to leave this event?')) {
       try {
-        console.log('Leaving event:', eventId);
-        
         setJoinedEvents(prev => ({
           ...prev,
           upcoming: prev.upcoming.filter(event => event.id !== eventId)
@@ -122,15 +117,12 @@ const JoinedEvents = () => {
         alert('You have successfully left the event.');
       } catch (err) {
         alert('Error leaving event. Please try again.');
-        console.error('Error leaving event:', err);
       }
     }
   };
 
   const downloadTicket = async (event) => {
     try {
-      console.log('Downloading ticket for event:', event.id);
-      
       const ticketData = {
         event: event.title,
         date: event.date,
@@ -152,7 +144,6 @@ const JoinedEvents = () => {
       alert('Ticket downloaded successfully!');
     } catch (err) {
       alert('Error downloading ticket. Please try again.');
-      console.error('Error downloading ticket:', err);
     }
   };
 
@@ -171,13 +162,11 @@ const JoinedEvents = () => {
         alert('Event details copied to clipboard!');
       }
     } catch (err) {
-      console.error('Error sharing event:', err);
     }
   };
 
   const submitFeedback = async (eventId) => {
     try {
-      console.log('Submitting feedback for event:', eventId);
       setJoinedEvents(prev => ({
         ...prev,
         past: prev.past.map(event => 
@@ -190,7 +179,6 @@ const JoinedEvents = () => {
       alert('Thank you for your feedback!');
     } catch (err) {
       alert('Error submitting feedback. Please try again.');
-      console.error('Error submitting feedback:', err);
     }
   };
 
@@ -525,7 +513,6 @@ const EventCard = ({
         </div>
       </div>
 
-
       {isExpanded && (
         <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
           {type === 'upcoming' ? (
@@ -601,7 +588,6 @@ const EventCard = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
               <div>
                 <h4 className="font-semibold text-gray-900 mb-3">Your Impact</h4>
                 {event.impact && (

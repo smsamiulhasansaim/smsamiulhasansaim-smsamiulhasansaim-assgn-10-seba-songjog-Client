@@ -1,5 +1,4 @@
 // Home Component - Created by S M Samiul Hasan
-
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -23,7 +22,6 @@ import {
   faExclamationTriangle
 } from '@fortawesome/free-solid-svg-icons';
 
-// Component authored by: S M Samiul Hasan
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -114,7 +112,7 @@ const Home = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
+        const response = await fetch('http://localhost:5000/api/events');
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -124,16 +122,32 @@ const Home = () => {
         }
 
         const data = await response.json();
+        let eventsData = [];
         
-        if (Array.isArray(data) && data.length > 0) {
-          const limitedData = data.slice(0, 3);
-          setFeaturedEvents(limitedData);
+        if (data.data && Array.isArray(data.data)) {
+          eventsData = data.data;
+        } else if (data.events && Array.isArray(data.events)) {
+          eventsData = data.events;
+        } else if (Array.isArray(data)) {
+          eventsData = data;
+        } else if (typeof data === 'object' && data !== null) {
+          eventsData = [data];
+        } else {
+          throw new Error('Invalid data format received from API');
+        }
+        
+        if (eventsData.length > 0) {
+          const limitedData = eventsData.slice(0, 3);
+          const normalizedEvents = limitedData.map(event => ({
+            id: event.eventId || event._id,
+            ...event
+          }));
+          setFeaturedEvents(normalizedEvents);
         } else {
           setFeaturedEvents([]);
         }
 
       } catch (err) {
-        console.error('API fetch error:', err);
         setError('ডাটা লোড করতে সমস্যা হচ্ছে');
         setFeaturedEvents([]);
       } finally {
@@ -217,26 +231,40 @@ const Home = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Searching for:', searchTerm);
   };
 
   const retryFetch = () => {
     setLoading(true);
     setError(null);
-    fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events')
+    fetch('http://localhost:5000/api/events')
       .then(response => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.json();
       })
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setFeaturedEvents(data.slice(0, 3));
+        let eventsData = [];
+        if (data.data && Array.isArray(data.data)) {
+          eventsData = data.data;
+        } else if (data.events && Array.isArray(data.events)) {
+          eventsData = data.events;
+        } else if (Array.isArray(data)) {
+          eventsData = data;
+        } else if (typeof data === 'object' && data !== null) {
+          eventsData = [data];
+        }
+        
+        if (eventsData.length > 0) {
+          const normalizedEvents = eventsData.slice(0, 3).map(event => ({
+            id: event.eventId || event._id,
+            ...event
+          }));
+          setFeaturedEvents(normalizedEvents);
         } else {
           setFeaturedEvents([]);
         }
       })
       .catch(error => {
-        error.setError('ডাটা লোড করতে সমস্যা হচ্ছে');
+        setError('ডাটা লোড করতে সমস্যা হচ্ছে');
         setFeaturedEvents([]);
       })
       .finally(() => {
@@ -581,10 +609,32 @@ const Home = () => {
                   whileHover="hover"
                   transition={{ delay: index * 0.1 }}
                 >
-                  <div className="h-40 sm:h-48 bg-gradient-to-br from-green-400 to-blue-500 relative">
+                  {/* Image Container with Conditional Rendering */}
+                  <div className="h-40 sm:h-48 relative group overflow-hidden">
+                    {/* Image display logic */}
+                    {event.images && event.images.length > 0 ? (
+                      <img 
+                        src={event.images[0]} 
+                        alt={event.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    
+                    {/* Fallback Gradient (Hidden if image exists) */}
+                    <div 
+                      className={`w-full h-full bg-gradient-to-br from-green-400 to-blue-500 absolute top-0 left-0 ${
+                        event.images && event.images.length > 0 ? 'hidden' : 'block'
+                      }`}
+                    ></div>
+
+                    {/* Verified Badge */}
                     {event.verified && (
                       <motion.div 
-                        className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold flex items-center"
+                        className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold flex items-center z-10"
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
@@ -593,9 +643,10 @@ const Home = () => {
                         Verified
                       </motion.div>
                     )}
+                    {/* Urgent Badge */}
                     {event.urgent && (
                       <motion.div 
-                        className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-red-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold flex items-center"
+                        className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-red-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold flex items-center z-10"
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.6 }}
@@ -654,11 +705,11 @@ const Home = () => {
                         whileTap="tap"
                       >
                         <NavLink 
-                        to={`/event/${event._id}`}
-                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition duration-300 font-semibold text-sm sm:text-base"
-                      >
-                        View Details
-                      </NavLink>
+                          to={`/event/${event.id}`}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition duration-300 font-semibold text-sm sm:text-base"
+                        >
+                          View Details
+                        </NavLink>
                       </motion.div>
                     </div>
                   </div>

@@ -1,5 +1,3 @@
-// CreateEvent Component - Created by S M Samiul Hasan
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,7 +8,7 @@ import {
   faClock,
   faImage,
   faTag,
-  faUpload,
+  faLink,
   faPlus,
   faMinus,
   faLightbulb,
@@ -27,9 +25,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/AuthContext';
 
-// Component authored by: S M Samiul Hasan
 const CreateEvent = () => {
   const { user } = useAuth();
+  
+  const [imageUrlInput, setImageUrlInput] = useState(''); 
+
   const [eventData, setEventData] = useState({
     title: '',
     organization: '',
@@ -72,15 +72,15 @@ const CreateEvent = () => {
   const [success, setSuccess] = useState(false);
 
   const categories = [
-    'cleanup',
-    'environment',
-    'education',
-    'community',
-    'healthcare',
-    'animal welfare',
-    'elderly care',
-    'disaster relief',
-    'other'
+    { value: 'cleanup', label: 'পরিচ্ছন্নতা অভিযান' },
+    { value: 'environment', label: 'পরিবেশ রক্ষা' },
+    { value: 'education', label: 'শিক্ষা কার্যক্রম' },
+    { value: 'community', label: 'কমিউনিটি সেবা' },
+    { value: 'healthcare', label: 'স্বাস্থ্যসেবা' },
+    { value: 'animal welfare', label: 'প্রাণী কল্যাণ' },
+    { value: 'elderly care', label: 'প্রবীণ সেবা' },
+    { value: 'disaster relief', label: 'দুর্যোগ ব্যবস্থাপনা' },
+    { value: 'other', label: 'অন্যান্য' }
   ];
 
   const containerVariants = {
@@ -128,49 +128,49 @@ const CreateEvent = () => {
     const newErrors = {};
     
     if (!eventData.title.trim()) {
-      newErrors.title = 'Event title is required';
+      newErrors.title = 'ইভেন্টের নাম আবশ্যক';
     }
     
     if (!eventData.organization.trim()) {
-      newErrors.organization = 'Organization name is required';
+      newErrors.organization = 'সংগঠনের নাম আবশ্যক';
     }
     
     if (!eventData.organizer.trim()) {
-      newErrors.organizer = 'Organizer name is required';
+      newErrors.organizer = 'আয়োজকের নাম আবশ্যক';
     }
     
     if (!eventData.description.trim()) {
-      newErrors.description = 'Short description is required';
+      newErrors.description = 'সংক্ষিপ্ত বিবরণ আবশ্যক';
     }
     
     if (!eventData.fullDescription.trim()) {
-      newErrors.fullDescription = 'Full description is required';
+      newErrors.fullDescription = 'বিস্তারিত বিবরণ আবশ্যক';
     }
     
     if (!eventData.category) {
-      newErrors.category = 'Category is required';
+      newErrors.category = 'ক্যাটাগরি নির্বাচন করা আবশ্যক';
     }
     
     if (!eventData.date) {
-      newErrors.date = 'Event date is required';
+      newErrors.date = 'ইভেন্টের তারিখ আবশ্যক';
     }
     
     if (!eventData.time) {
-      newErrors.time = 'Start time is required';
+      newErrors.time = 'শুরুর সময় আবশ্যক';
     }
     
     if (!eventData.location.trim()) {
-      newErrors.location = 'Location is required';
+      newErrors.location = 'লোকেশন বা ঠিকানা আবশ্যক';
     }
     
     if (!eventData.maxVolunteers || eventData.maxVolunteers < 1) {
-      newErrors.maxVolunteers = 'Maximum volunteers must be at least 1';
+      newErrors.maxVolunteers = 'স্বেচ্ছাসেবকের সংখ্যা কমপক্ষে ১ হতে হবে';
     }
     
     if (!eventData.contact.email) {
-      newErrors.contactEmail = 'Contact email is required';
+      newErrors.contactEmail = 'যোগাযোগের ইমেইল আবশ্যক';
     } else if (!/\S+@\S+\.\S+/.test(eventData.contact.email)) {
-      newErrors.contactEmail = 'Invalid email address';
+      newErrors.contactEmail = 'সঠিক ইমেইল ঠিকানা দিন';
     }
 
     setErrors(newErrors);
@@ -245,24 +245,23 @@ const CreateEvent = () => {
     }
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    console.log('Uploading images:', files);
-    const imageUrls = files.map(file => URL.createObjectURL(file));
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setImageUrlInput(url);
     setEventData(prev => ({
       ...prev,
-      images: [...prev.images, ...imageUrls]
+      images: url ? [url] : []
     }));
   };
 
   const generateAiSuggestions = () => {
     const suggestions = [
-      "Beach Cleanup Drive - Protect Marine Life",
-      "Tree Plantation Campaign - Create Greener Environment",
-      "Street Children Education Program - Provide Educational Support",
-      "Community Health Awareness Camp - Spread Health Awareness",
-      "Plastic Waste Recycling Workshop - Learn Recycling Techniques",
-      "River Cleanup Mission - Protect Water Bodies"
+      "সমুদ্র সৈকত পরিচ্ছন্নতা - সামুদ্রিক জীবন রক্ষা করুন",
+      "বৃক্ষরোপণ কর্মসূচি - সবুজ পৃথিবী গড়ুন",
+      "পথশিশুদের শিক্ষা কার্যক্রম - শিক্ষার আলো ছড়িয়ে দিন",
+      "স্বাস্থ্য সচেতনতা ক্যাম্প - সুস্থ সমাজ গড়ুন",
+      "বর্জ্য পুনর্ব্যবহার কর্মশালা - রিসাইক্লিং শিখুন",
+      "নদী পরিষ্কার অভিযান - জলাশয় রক্ষা করুন"
     ];
     setAiSuggestions(suggestions);
     setShowAiSuggestions(true);
@@ -299,7 +298,7 @@ const CreateEvent = () => {
     }
 
     if (!user) {
-      alert('Please log in to create an event');
+      alert('ইভেন্ট তৈরি করতে অনুগ্রহ করে লগইন করুন');
       return;
     }
 
@@ -308,6 +307,10 @@ const CreateEvent = () => {
     
     try {
       const eventPoints = calculatePoints(eventData.category);
+
+      const finalImages = eventData.images.length > 0 
+        ? eventData.images 
+        : ['https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'];
 
       const finalEventData = {
         title: eventData.title || '',
@@ -327,7 +330,7 @@ const CreateEvent = () => {
         maxVolunteers: parseInt(eventData.maxVolunteers) || 0,
         volunteers: 0,
         requirements: eventData.requirements.filter(req => req.trim() !== ''),
-        images: eventData.images.length > 0 ? eventData.images : ['/api/placeholder/600/400'],
+        images: finalImages,
         contact: {
           email: eventData.contact.email || '',
           phone: eventData.contact.phone || '',
@@ -351,9 +354,7 @@ const CreateEvent = () => {
         visibility: "public"
       };
 
-      console.log('Submitting event data:', finalEventData);
-
-      const eventResponse = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events', {
+      const eventResponse = await fetch('http://localhost:5000/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -363,55 +364,19 @@ const CreateEvent = () => {
 
       if (!eventResponse.ok) {
         const errorData = await eventResponse.json();
-        throw new Error(errorData.error || 'Failed to create event');
+        throw new Error(errorData.error || 'ইভেন্ট তৈরি করা যায়নি');
       }
 
       const eventResult = await eventResponse.json();
-      console.log('Event created and added to user profile:', eventResult);
 
       setSuccess(true);
       
       setTimeout(() => {
-        setEventData({
-          title: '',
-          organization: '',
-          organizer: '',
-          description: '',
-          fullDescription: '',
-          category: '',
-          date: '',
-          time: '',
-          endTime: '',
-          location: '',
-          coordinates: { lat: '', lng: '' },
-          maxVolunteers: '',
-          volunteers: 0,
-          requirements: [''],
-          images: [],
-          contact: {
-            email: '',
-            phone: '',
-            website: ''
-          },
-          verified: false,
-          rating: 0,
-          reviews: 0,
-          impact: {
-            wasteCollected: '',
-            areaCleaned: '',
-            previousParticipants: ''
-          },
-          liveAttendance: 0,
-          points: 0,
-          isRecurring: false,
-          recurrence: ''
-        });
-        setSuccess(false);
+        resetForm();
       }, 3000);
 
     } catch (error) {
-      console.error('Error creating event:', error);
-      setErrors({ submit: error.message || 'Error creating event. Please try again.' });
+      setErrors({ submit: error.message || 'ইভেন্ট তৈরিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।' });
     } finally {
       setIsSubmitting(false);
     }
@@ -452,6 +417,7 @@ const CreateEvent = () => {
       isRecurring: false,
       recurrence: ''
     });
+    setImageUrlInput('');
     setErrors({});
     setSuccess(false);
   };
@@ -472,8 +438,8 @@ const CreateEvent = () => {
             className="bg-white p-8 rounded-lg shadow-lg"
           >
             <FontAwesomeIcon icon={faExclamationTriangle} className="h-16 w-16 text-yellow-500 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Required</h2>
-            <p className="text-gray-600 mb-4">Please log in to create events</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">লগইন প্রয়োজন</h2>
+            <p className="text-gray-600 mb-4">ইভেন্ট তৈরি করতে হলে আপনাকে লগইন করতে হবে</p>
             <motion.a
               href="/login"
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-300"
@@ -481,7 +447,7 @@ const CreateEvent = () => {
               whileHover="hover"
               whileTap="tap"
             >
-              Go to Login
+              লগইন পেজে যান
             </motion.a>
           </motion.div>
         </div>
@@ -507,7 +473,7 @@ const CreateEvent = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            Create New Event
+            নতুন ইভেন্ট তৈরি করুন
           </motion.h1>
           <motion.p 
             className="mt-2 text-sm text-gray-600"
@@ -515,7 +481,7 @@ const CreateEvent = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            Organize a community service event and make a difference
+            একটি সামাজিক ইভেন্ট আয়োজন করুন এবং সমাজে পরিবর্তন আনুন
           </motion.p>
           <motion.p 
             className="mt-1 text-xs text-green-600"
@@ -523,7 +489,7 @@ const CreateEvent = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
           >
-            Event will be added to both public events and your personal events
+            ইভেন্টটি পাবলিক লিস্টে এবং আপনার প্রোফাইলে যুক্ত হবে
           </motion.p>
         </motion.div>
 
@@ -537,7 +503,7 @@ const CreateEvent = () => {
             >
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faCheckCircle} className="h-5 w-5 text-green-500 mr-2" />
-                <span className="text-green-800 font-medium">Event created successfully! It's now available in public events and your personal events.</span>
+                <span className="text-green-800 font-medium">ইভেন্ট সফলভাবে তৈরি হয়েছে! এটি এখন পাবলিক ইভেন্ট তালিকায় দেখা যাবে।</span>
               </div>
             </motion.div>
           )}
@@ -556,7 +522,7 @@ const CreateEvent = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <label className="block text-sm font-medium text-gray-700">
-                Event Title *
+                ইভেন্টের নাম / শিরোনাম *
               </label>
               <motion.button
                 type="button"
@@ -567,7 +533,7 @@ const CreateEvent = () => {
                 whileTap="tap"
               >
                 <FontAwesomeIcon icon={faLightbulb} className="h-3 w-3 mr-1" />
-                AI Suggestions
+                AI সাজেশন
               </motion.button>
             </div>
             
@@ -580,7 +546,7 @@ const CreateEvent = () => {
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 ${
                 errors.title ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
-              placeholder="Enter a compelling event title..."
+              placeholder="একটি আকর্ষণীয় ইভেন্টের নাম দিন..."
               whileFocus={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             />
@@ -633,7 +599,7 @@ const CreateEvent = () => {
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FontAwesomeIcon icon={faBuilding} className="h-4 w-4 mr-2 text-gray-400" />
-                  Organization *
+                  সংগঠনের নাম *
                 </label>
                 <input
                   type="text"
@@ -644,7 +610,7 @@ const CreateEvent = () => {
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 ${
                     errors.organization ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
-                  placeholder="Your organization name"
+                  placeholder="আপনার সংগঠনের নাম"
                 />
                 {errors.organization && (
                   <p className="text-red-600 text-xs mt-1 flex items-center">
@@ -656,7 +622,7 @@ const CreateEvent = () => {
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FontAwesomeIcon icon={faUser} className="h-4 w-4 mr-2 text-gray-400" />
-                  Organizer Name *
+                  আয়োজকের নাম *
                 </label>
                 <input
                   type="text"
@@ -667,7 +633,7 @@ const CreateEvent = () => {
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 ${
                     errors.organizer ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
-                  placeholder="Your full name"
+                  placeholder="আপনার পূর্ণ নাম"
                 />
                 {errors.organizer && (
                   <p className="text-red-600 text-xs mt-1 flex items-center">
@@ -687,7 +653,7 @@ const CreateEvent = () => {
           >
             <motion.label className="block text-sm font-medium text-gray-700 mb-2" variants={itemVariants}>
               <FontAwesomeIcon icon={faFileAlt} className="h-4 w-4 mr-2 text-gray-400" />
-              Short Description *
+              সংক্ষিপ্ত বিবরণ *
             </motion.label>
             <motion.input
               type="text"
@@ -698,7 +664,7 @@ const CreateEvent = () => {
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 mb-4 ${
                 errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
-              placeholder="Brief description of your event..."
+              placeholder="ইভেন্ট সম্পর্কে এক লাইনে কিছু লিখুন..."
               whileFocus={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             />
@@ -710,7 +676,7 @@ const CreateEvent = () => {
             )}
             
             <motion.label className="block text-sm font-medium text-gray-700 mb-2" variants={itemVariants}>
-              Full Description *
+              বিস্তারিত বিবরণ *
             </motion.label>
             <motion.textarea
               name="fullDescription"
@@ -721,7 +687,7 @@ const CreateEvent = () => {
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 ${
                 errors.fullDescription ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
-              placeholder="Describe your event in detail... What will volunteers do? Why is it important? What to expect?"
+              placeholder="ইভেন্ট সম্পর্কে বিস্তারিত লিখুন... স্বেচ্ছাসেবকরা কি করবে? কেন এটি গুরুত্বপূর্ণ?"
               whileFocus={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             />
@@ -743,7 +709,7 @@ const CreateEvent = () => {
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FontAwesomeIcon icon={faTag} className="h-4 w-4 mr-2 text-gray-400" />
-                  Category *
+                  ক্যাটাগরি *
                 </label>
                 <select
                   name="category"
@@ -754,10 +720,10 @@ const CreateEvent = () => {
                     errors.category ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">Select a category</option>
-                  {categories.map((category, index) => (
-                    <option key={index} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                  <option value="">ক্যাটাগরি নির্বাচন করুন</option>
+                  {categories.map((cat, index) => (
+                    <option key={index} value={cat.value}>
+                      {cat.label}
                     </option>
                   ))}
                 </select>
@@ -772,7 +738,7 @@ const CreateEvent = () => {
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FontAwesomeIcon icon={faUsers} className="h-4 w-4 mr-2 text-gray-400" />
-                  Maximum Volunteers *
+                  সর্বোচ্চ স্বেচ্ছাসেবক সংখ্যা *
                 </label>
                 <input
                   type="number"
@@ -784,7 +750,7 @@ const CreateEvent = () => {
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 ${
                     errors.maxVolunteers ? 'border-red-500 bg-red-50' : 'border-gray-300'
                   }`}
-                  placeholder="e.g., 50"
+                  placeholder="যেমন: ৫০"
                 />
                 {errors.maxVolunteers && (
                   <p className="text-red-600 text-xs mt-1 flex items-center">
@@ -802,8 +768,7 @@ const CreateEvent = () => {
               <div className="flex items-center text-sm text-blue-700">
                 <FontAwesomeIcon icon={faLightbulb} className="h-4 w-4 mr-2" />
                 <span>
-                  This event will reward <strong>{calculatePoints(eventData.category)} points</strong> to volunteers
-                  {eventData.category && ` (${eventData.category} category)`}
+                  এই ইভেন্টে অংশগ্রহণ করলে স্বেচ্ছাসেবকরা পাবেন <strong>{calculatePoints(eventData.category)} পয়েন্ট</strong>
                 </span>
               </div>
             </motion.div>
@@ -817,13 +782,13 @@ const CreateEvent = () => {
           >
             <motion.h3 className="text-lg font-medium text-gray-900 mb-4" variants={itemVariants}>
               <FontAwesomeIcon icon={faCalendarAlt} className="h-5 w-5 mr-2 text-gray-400" />
-              Date & Time
+              তারিখ ও সময়
             </motion.h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { field: 'date', label: 'Date *', type: 'date' },
-                { field: 'time', label: 'Start Time *', type: 'time' },
-                { field: 'endTime', label: 'End Time', type: 'time' }
+                { field: 'date', label: 'তারিখ *', type: 'date' },
+                { field: 'time', label: 'শুরুর সময় *', type: 'time' },
+                { field: 'endTime', label: 'শেষ হওয়ার সময়', type: 'time' }
               ].map((item, index) => (
                 <motion.div 
                   key={item.field}
@@ -867,7 +832,7 @@ const CreateEvent = () => {
                 className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
               />
               <label className="ml-2 block text-sm text-gray-900">
-                This is a recurring event
+                এটি একটি পুনরাবৃত্ত (Recurring) ইভেন্ট
               </label>
             </motion.div>
 
@@ -886,10 +851,10 @@ const CreateEvent = () => {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
                   >
-                    <option value="">Select recurrence</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly">Bi-weekly</option>
-                    <option value="monthly">Monthly</option>
+                    <option value="">পুনরাবৃত্তির ধরন নির্বাচন করুন</option>
+                    <option value="weekly">সাপ্তাহিক (Weekly)</option>
+                    <option value="biweekly">পাক্ষিক (Bi-weekly)</option>
+                    <option value="monthly">মাসিক (Monthly)</option>
                   </select>
                 </motion.div>
               )}
@@ -904,7 +869,7 @@ const CreateEvent = () => {
           >
             <motion.label className="block text-sm font-medium text-gray-700 mb-2" variants={itemVariants}>
               <FontAwesomeIcon icon={faMapMarkerAlt} className="h-4 w-4 mr-2 text-gray-400" />
-              Event Location *
+              ইভেন্টের স্থান / লোকেশন *
             </motion.label>
             <motion.input
               type="text"
@@ -915,7 +880,7 @@ const CreateEvent = () => {
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300 mb-4 ${
                 errors.location ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
-              placeholder="Enter full address or location details..."
+              placeholder="পূর্ণ ঠিকানা লিখুন..."
               whileFocus={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             />
@@ -937,7 +902,7 @@ const CreateEvent = () => {
                   transition={{ delay: index * 0.1 }}
                 >
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {coord === 'lat' ? 'Latitude' : 'Longitude'}
+                    {coord === 'lat' ? 'অক্ষাংশ (Latitude)' : 'দ্রাঘিমাংশ (Longitude)'}
                   </label>
                   <input
                     type="number"
@@ -945,13 +910,13 @@ const CreateEvent = () => {
                     value={eventData.coordinates[coord]}
                     onChange={(e) => handleCoordinateChange(coord, e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
-                    placeholder={coord === 'lat' ? "e.g., 23.8103" : "e.g., 90.4125"}
+                    placeholder={coord === 'lat' ? "যেমন: 23.8103" : "যেমন: 90.4125"}
                   />
                 </motion.div>
               ))}
             </div>
             <motion.p className="mt-1 text-sm text-gray-500" variants={itemVariants}>
-              Volunteers will see this location on the map
+              স্বেচ্ছাসেবকরা ম্যাপে এই লোকেশন দেখতে পাবে
             </motion.p>
           </motion.div>
 
@@ -962,7 +927,7 @@ const CreateEvent = () => {
             transition={{ duration: 0.2 }}
           >
             <motion.h3 className="text-lg font-medium text-gray-900 mb-4" variants={itemVariants}>
-              Contact Information
+              যোগাযোগের তথ্য
             </motion.h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
@@ -980,8 +945,8 @@ const CreateEvent = () => {
                 >
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <FontAwesomeIcon icon={contact.icon} className="h-4 w-4 mr-2 text-gray-400" />
-                    {contact.field === 'email' ? 'Contact Email *' : 
-                     contact.field === 'phone' ? 'Contact Phone' : 'Website'}
+                    {contact.field === 'email' ? 'ইমেইল *' : 
+                     contact.field === 'phone' ? 'মোবাইল নম্বর' : 'ওয়েবসাইট'}
                   </label>
                   <input
                     type={contact.type}
@@ -1012,7 +977,7 @@ const CreateEvent = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <label className="block text-sm font-medium text-gray-700">
-                Volunteer Requirements
+                স্বেচ্ছাসেবকদের জন্য প্রয়োজনীয়তা
               </label>
               <motion.button
                 type="button"
@@ -1023,7 +988,7 @@ const CreateEvent = () => {
                 whileTap="tap"
               >
                 <FontAwesomeIcon icon={faPlus} className="h-3 w-3 mr-1" />
-                Add Requirement
+                যুক্ত করুন
               </motion.button>
             </div>
 
@@ -1042,7 +1007,7 @@ const CreateEvent = () => {
                     value={requirement}
                     onChange={(e) => handleRequirementChange(index, e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
-                    placeholder="e.g., Bring gloves, Wear comfortable shoes..."
+                    placeholder="যেমন: গ্লাভস সাথে আনুন, আরামদায়ক জুতা পরুন..."
                   />
                   {eventData.requirements.length > 1 && (
                     <motion.button
@@ -1068,13 +1033,13 @@ const CreateEvent = () => {
           >
             <motion.h3 className="text-lg font-medium text-gray-900 mb-4" variants={itemVariants}>
               <FontAwesomeIcon icon={faChartBar} className="h-5 w-5 mr-2 text-gray-400" />
-              Impact Information (Optional)
+              প্রভাব বা ইম্প্যাক্ট তথ্য (ঐচ্ছিক)
             </motion.h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { field: 'wasteCollected', placeholder: 'e.g., 2.5 tons' },
-                { field: 'areaCleaned', placeholder: 'e.g., 5 km coastline' },
-                { field: 'previousParticipants', placeholder: 'e.g., 500+' }
+                { field: 'wasteCollected', placeholder: 'যেমন: ২.৫ টন', label: 'বর্জ্য সংগ্রহ' },
+                { field: 'areaCleaned', placeholder: 'যেমন: ৫ কি.মি.', label: 'পরিষ্কারকৃত এলাকা' },
+                { field: 'previousParticipants', placeholder: 'যেমন: ৫০০+', label: 'পূর্ববর্তী অংশগ্রহণকারী' }
               ].map((impact, index) => (
                 <motion.div 
                   key={impact.field}
@@ -1085,8 +1050,7 @@ const CreateEvent = () => {
                   transition={{ delay: index * 0.1 }}
                 >
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {impact.field === 'wasteCollected' ? 'Waste Collected' :
-                     impact.field === 'areaCleaned' ? 'Area Cleaned' : 'Previous Participants'}
+                    {impact.label}
                   </label>
                   <input
                     type="text"
@@ -1116,11 +1080,11 @@ const CreateEvent = () => {
               />
               <label className="ml-2 block text-sm text-gray-900">
                 <FontAwesomeIcon icon={faCertificate} className="h-4 w-4 mr-1 text-green-500" />
-                Verified Organization
+                ভেরিফাইড সংগঠন
               </label>
             </motion.div>
             <motion.p className="mt-1 text-sm text-gray-500" variants={itemVariants}>
-              Check this if your organization is officially verified
+              আপনার সংগঠনটি যদি অফিসিয়ালি ভেরিফাইড হয় তবে টিক দিন
             </motion.p>
           </motion.div>
 
@@ -1132,34 +1096,27 @@ const CreateEvent = () => {
           >
             <motion.label className="block text-sm font-medium text-gray-700 mb-2" variants={itemVariants}>
               <FontAwesomeIcon icon={faImage} className="h-4 w-4 mr-2 text-gray-400" />
-              Event Images (Optional)
+              ইভেন্টের ছবি (URL) - ঐচ্ছিক
             </motion.label>
             <motion.div 
-              className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center"
+              className="border border-gray-300 rounded-md p-6"
               whileHover={{ borderColor: "#10B981" }}
               transition={{ duration: 0.3 }}
             >
-              <FontAwesomeIcon icon={faUpload} className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600 mb-2">
-                Upload images for your event
+              <div className="flex items-center space-x-2 mb-4">
+                 <FontAwesomeIcon icon={faLink} className="text-gray-400" />
+                 <input
+                  type="text"
+                  value={imageUrlInput}
+                  onChange={handleImageUrlChange}
+                  placeholder="ইমেজের সরাসরি লিংক (URL) এখানে পেস্ট করুন..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
+                />
+              </div>
+              
+              <p className="text-xs text-gray-500 text-center">
+                ইন্টারনেট থেকে কোনো ইমেজের লিংক কপি করে এখানে দিন।
               </p>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                id="image-upload"
-              />
-              <motion.label
-                htmlFor="image-upload"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 cursor-pointer transition duration-300"
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-              >
-                Choose Files
-              </motion.label>
             </motion.div>
             
             <AnimatePresence>
@@ -1171,19 +1128,26 @@ const CreateEvent = () => {
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Images:</p>
+                  <p className="text-sm font-medium text-gray-700 mb-2">ছবির প্রিভিউ:</p>
                   <div className="flex flex-wrap gap-2">
                     {eventData.images.map((image, index) => (
-                      <motion.img
+                      <motion.div
                         key={index}
-                        src={image}
-                        alt={`Event preview ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-md"
+                        className="relative"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.1, duration: 0.3 }}
-                        whileHover={{ scale: 1.1 }}
-                      />
+                      >
+                        <motion.img
+                          src={image}
+                          alt={`Event preview`}
+                          className="w-full h-48 object-cover rounded-md border border-gray-200"
+                          onError={(e) => {
+                            e.target.onerror = null; 
+                            e.target.src = 'https://via.placeholder.com/400x200?text=Invalid+Image+URL'
+                          }}
+                        />
+                      </motion.div>
                     ))}
                   </div>
                 </motion.div>
@@ -1219,7 +1183,7 @@ const CreateEvent = () => {
               whileHover="hover"
               whileTap="tap"
             >
-              Reset Form
+              রিসেট করুন
             </motion.button>
             
             <div className="flex space-x-4">
@@ -1230,7 +1194,7 @@ const CreateEvent = () => {
                 whileHover="hover"
                 whileTap="tap"
               >
-                Save as Draft
+                ড্রাফট হিসেবে রাখুন
               </motion.button>
               <motion.button
                 type="submit"
@@ -1247,10 +1211,10 @@ const CreateEvent = () => {
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
                     />
-                    Creating Event...
+                    তৈরি হচ্ছে...
                   </div>
                 ) : (
-                  'Create Event'
+                  'ইভেন্ট তৈরি করুন'
                 )}
               </motion.button>
             </div>

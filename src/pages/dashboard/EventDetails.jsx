@@ -1,4 +1,4 @@
-// JoinedEvents Component - Created by S M Samiul Hasan
+// EventDetails Component - Created by S M Samiul Hasan
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,19 +35,43 @@ const EventDetails = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await fetch(`http://localhost:3000/api/events/${eventId}`);
-        
-        if (response.ok) {
-          const eventData = await response.json();
-          setEvent(eventData);
-        } else {
-          setError('Event not found');
+
+        const response = await fetch('http://localhost:5000/api/events');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
         }
-        
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType?.includes('application/json')) {
+          throw new Error('Invalid response format');
+        }
+
+        const data = await response.json();
+        let eventsData = [];
+
+        if (data.data && Array.isArray(data.data)) {
+          eventsData = data.data;
+        } else if (data.events && Array.isArray(data.events)) {
+          eventsData = data.events;
+        } else if (Array.isArray(data)) {
+          eventsData = data;
+        } else {
+          throw new Error('Invalid events data format received from API');
+        }
+
+        const foundEvent = eventsData.find(event =>
+          event.eventId === eventId || event._id === eventId
+        );
+
+        if (!foundEvent) {
+          throw new Error(`Event with ID ${eventId} not found`);
+        }
+
+        setEvent(foundEvent);
+
       } catch (error) {
-        console.error('Error fetching event:', error);
-        setError('Failed to load event details');
+        setError(error.message || 'Failed to load event details');
       } finally {
         setLoading(false);
       }
@@ -76,16 +100,26 @@ const EventDetails = () => {
   };
 
   const formatDate = (dateString) => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    if (!dateString) return 'Date not specified';
+    try {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('en-US', options);
+    } catch (error) {
+      return 'Invalid date';
+    }
   };
 
   const getDaysUntilEvent = (dateString) => {
-    const eventDate = new Date(dateString);
-    const today = new Date();
-    const diffTime = eventDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    if (!dateString) return 0;
+    try {
+      const eventDate = new Date(dateString);
+      const today = new Date();
+      const diffTime = eventDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? diffDays : 0;
+    } catch (error) {
+      return 0;
+    }
   };
 
   const getVolunteerProgress = () => {
@@ -97,10 +131,10 @@ const EventDetails = () => {
 
   const normalizeEvent = (eventData) => {
     if (!eventData) return null;
-    
+
     return {
-      id: eventData._id,
-      eventId: eventData._id,
+      id: eventData.eventId || eventData._id,
+      eventId: eventData.eventId || eventData._id,
       title: eventData.title || 'No Title',
       organization: eventData.organization || 'Unknown Organization',
       organizer: eventData.organizer || eventData.organization || 'Unknown Organizer',
@@ -149,7 +183,7 @@ const EventDetails = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Event Not Found</h2>
           <p className="text-gray-600 mb-4">{error || 'The event you are looking for does not exist.'}</p>
           <button
-            onClick={() => navigate('/events')}
+            onClick={() => navigate('/upcoming-events')}
             className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold"
           >
             Browse Events
@@ -171,7 +205,7 @@ const EventDetails = () => {
               <FontAwesomeIcon icon={faArrowLeft} className="h-5 w-5 mr-2" />
               Back to Events
             </button>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={handleShareEvent}
@@ -180,7 +214,7 @@ const EventDetails = () => {
                 <FontAwesomeIcon icon={faShare} className="h-4 w-4 mr-2" />
                 Share
               </button>
-              
+
               {isJoined && (
                 <button
                   onClick={() => setShowQRCode(true)}
@@ -203,7 +237,7 @@ const EventDetails = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center flex-wrap gap-2 mb-3">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      {normalizedEvent.category.charAt(0).toUpperCase() + normalizedEvent.category.slice(1)}
+                      {normalizedEvent.category?.charAt(0).toUpperCase() + normalizedEvent.category?.slice(1) || 'General'}
                     </span>
                     {normalizedEvent.verified && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
@@ -213,14 +247,14 @@ const EventDetails = () => {
                     )}
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                       <FontAwesomeIcon icon={faStar} className="h-4 w-4 mr-1" />
-                      {normalizedEvent.rating} ({normalizedEvent.reviews} reviews)
+                      {normalizedEvent.rating?.toFixed(1) || '0.0'} ({normalizedEvent.reviews || 0} reviews)
                     </span>
                   </div>
-                  
+
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     {normalizedEvent.title}
                   </h1>
-                  
+
                   <p className="text-lg text-gray-600 mb-4">
                     Organized by <span className="font-semibold">{normalizedEvent.organization}</span>
                   </p>
@@ -235,7 +269,7 @@ const EventDetails = () => {
                     <div className="text-sm text-gray-500">{getDaysUntilEvent(normalizedEvent.date)} days to go</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-700">
                   <FontAwesomeIcon icon={faClock} className="h-5 w-5 text-green-500 mr-3" />
                   <div>
@@ -243,15 +277,15 @@ const EventDetails = () => {
                     <div className="text-sm text-gray-500">Duration varies</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-700">
                   <FontAwesomeIcon icon={faMapMarkerAlt} className="h-5 w-5 text-green-500 mr-3" />
                   <div>
-                    <div className="font-semibold">{normalizedEvent.location.split(',')[0]}</div>
-                    <div className="text-sm text-gray-500">{normalizedEvent.location.split(',')[1] || 'Bangladesh'}</div>
+                    <div className="font-semibold">{normalizedEvent.location?.split(',')[0] || 'Location'}</div>
+                    <div className="text-sm text-gray-500">{normalizedEvent.location?.split(',')[1] || 'Bangladesh'}</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-700">
                   <FontAwesomeIcon icon={faUserFriends} className="h-5 w-5 text-green-500 mr-3" />
                   <div>
@@ -315,9 +349,9 @@ const EventDetails = () => {
                           className="text-green-600 hover:text-green-700 font-medium flex items-center transition duration-300"
                         >
                           {showFullDescription ? 'Show Less' : 'Read More'}
-                          <FontAwesomeIcon 
-                            icon={showFullDescription ? faChevronUp : faChevronDown} 
-                            className="h-4 w-4 ml-1" 
+                          <FontAwesomeIcon
+                            icon={showFullDescription ? faChevronUp : faChevronDown}
+                            className="h-4 w-4 ml-1"
                           />
                         </button>
                       )}
@@ -393,7 +427,7 @@ const EventDetails = () => {
                         <h4 className="font-semibold text-gray-700">Contact Person</h4>
                         <p className="text-gray-900">{normalizedEvent.organizer}</p>
                       </div>
-                      {normalizedEvent.contact.email && (
+                      {normalizedEvent.contact?.email && (
                         <div className="flex items-center text-gray-700">
                           <FontAwesomeIcon icon={faEnvelope} className="h-4 w-4 mr-2" />
                           <a href={`mailto:${normalizedEvent.contact.email}`} className="text-green-600 hover:text-green-700">
@@ -401,7 +435,7 @@ const EventDetails = () => {
                           </a>
                         </div>
                       )}
-                      {normalizedEvent.contact.phone && (
+                      {normalizedEvent.contact?.phone && (
                         <div className="flex items-center text-gray-700">
                           <FontAwesomeIcon icon={faPhone} className="h-4 w-4 mr-2" />
                           <a href={`tel:${normalizedEvent.contact.phone}`} className="text-green-600 hover:text-green-700">
@@ -426,13 +460,13 @@ const EventDetails = () => {
                     <span>{normalizedEvent.volunteers}/{normalizedEvent.maxVolunteers}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-green-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${getVolunteerProgress()}%` }}
                     ></div>
                   </div>
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">{Math.max(normalizedEvent.maxVolunteers - normalizedEvent.volunteers, 0)}</div>
                   <div className="text-sm text-gray-600">Spots Available</div>

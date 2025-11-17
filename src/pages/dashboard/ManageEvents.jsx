@@ -52,22 +52,40 @@ const ManageEvents = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
+      const response = await fetch('http://localhost:5000/api/events');
       
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
       
-      const eventsData = await response.json();
+      const data = await response.json();
+      
+      // API রেসপন্স সঠিকভাবে পার্স করুন
+      let eventsData = [];
+      
+      if (data.data && Array.isArray(data.data)) {
+        eventsData = data.data;
+      } else if (data.events && Array.isArray(data.events)) {
+        eventsData = data.events;
+      } else if (Array.isArray(data)) {
+        eventsData = data;
+      } else {
+        console.warn('Unexpected API response format:', data);
+        eventsData = [];
+      }
+      
+      console.log('Parsed events data:', eventsData);
       
       const transformedEvents = {
         active: eventsData.filter(event => {
+          if (!event || !event.date) return false;
           const eventDate = new Date(event.date);
           const today = new Date();
           return eventDate >= today && event.status !== 'draft';
         }),
-        draft: eventsData.filter(event => event.status === 'draft'),
+        draft: eventsData.filter(event => event && event.status === 'draft'),
         completed: eventsData.filter(event => {
+          if (!event || !event.date) return false;
           const eventDate = new Date(event.date);
           const today = new Date();
           return eventDate < today && event.status !== 'draft';
@@ -115,7 +133,7 @@ const ManageEvents = () => {
         setProcessing(true);
         
         const deletePromises = selectedEvents.map(eventId => 
-          fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
+          fetch(`http://localhost:5000/api/events/${eventId}`, {
             method: 'DELETE'
           })
         );
@@ -140,7 +158,7 @@ const ManageEvents = () => {
       try {
         setProcessing(true);
         
-        const response = await fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
+        const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
           method: 'DELETE'
         });
         
@@ -202,7 +220,7 @@ const ManageEvents = () => {
         status: 'draft'
       };
 
-      const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events', {
+      const response = await fetch('http://localhost:5000/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -265,7 +283,8 @@ const ManageEvents = () => {
       cleanup: 'bg-blue-100 text-blue-800',
       environment: 'bg-green-100 text-green-800',
       education: 'bg-purple-100 text-purple-800',
-      community: 'bg-orange-100 text-orange-800'
+      community: 'bg-orange-100 text-orange-800',
+      other: 'bg-gray-100 text-gray-800'
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
@@ -475,6 +494,7 @@ const ManageEvents = () => {
                     <option value="environment">Environment</option>
                     <option value="education">Education</option>
                     <option value="community">Community</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
                 
