@@ -36,7 +36,7 @@ const EventDetails = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('http://localhost:5000/api/events');
+        const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
 
         if (!response.ok) {
           throw new Error('Failed to fetch events');

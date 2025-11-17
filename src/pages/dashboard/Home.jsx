@@ -112,7 +112,7 @@ const Home = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('http://localhost:5000/api/events');
+        const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -236,7 +236,7 @@ const Home = () => {
   const retryFetch = () => {
     setLoading(true);
     setError(null);
-    fetch('http://localhost:5000/api/events')
+    fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events')
       .then(response => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.json();

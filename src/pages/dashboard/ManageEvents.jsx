@@ -1,10 +1,3 @@
-/**
- * @author: S M Samiul Hasan
- * @file: ManageEvents.jsx
- * @description: This React component provides an interface for managing community events (create, edit, delete, view).
- * All rights reserved by S M Samiul Hasan.
- */
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -52,7 +45,7 @@ const ManageEvents = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:5000/api/events');
+      const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events');
       
       if (!response.ok) {
         throw new Error('Failed to fetch events');
@@ -60,7 +53,6 @@ const ManageEvents = () => {
       
       const data = await response.json();
       
-      // API রেসপন্স সঠিকভাবে পার্স করুন
       let eventsData = [];
       
       if (data.data && Array.isArray(data.data)) {
@@ -70,11 +62,8 @@ const ManageEvents = () => {
       } else if (Array.isArray(data)) {
         eventsData = data;
       } else {
-        console.warn('Unexpected API response format:', data);
         eventsData = [];
       }
-      
-      console.log('Parsed events data:', eventsData);
       
       const transformedEvents = {
         active: eventsData.filter(event => {
@@ -95,7 +84,6 @@ const ManageEvents = () => {
       setEvents(transformedEvents);
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching events:', err);
     } finally {
       setLoading(false);
     }
@@ -133,7 +121,7 @@ const ManageEvents = () => {
         setProcessing(true);
         
         const deletePromises = selectedEvents.map(eventId => 
-          fetch(`http://localhost:5000/api/events/${eventId}`, {
+          fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
             method: 'DELETE'
           })
         );
@@ -146,7 +134,6 @@ const ManageEvents = () => {
         alert('Events deleted successfully!');
       } catch (err) {
         alert('Error deleting events. Please try again.');
-        console.error('Error deleting events:', err);
       } finally {
         setProcessing(false);
       }
@@ -158,7 +145,7 @@ const ManageEvents = () => {
       try {
         setProcessing(true);
         
-        const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+        const response = await fetch(`https://assgn-10-seba-songjog-server.vercel.app/api/events/${eventId}`, {
           method: 'DELETE'
         });
         
@@ -171,7 +158,6 @@ const ManageEvents = () => {
         alert('Event deleted successfully!');
       } catch (err) {
         alert('Error deleting event. Please try again.');
-        console.error('Error deleting event:', err);
       } finally {
         setProcessing(false);
       }
@@ -220,7 +206,7 @@ const ManageEvents = () => {
         status: 'draft'
       };
 
-      const response = await fetch('http://localhost:5000/api/events', {
+      const response = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -238,14 +224,12 @@ const ManageEvents = () => {
       alert('Event duplicated successfully!');
     } catch (err) {
       alert('Error duplicating event. Please try again.');
-      console.error('Error duplicating event:', err);
     } finally {
       setProcessing(false);
     }
   };
 
   const handleExportData = () => {
-    console.log('Exporting event data');
   };
 
   const handleEditEvent = (eventId) => {
@@ -344,12 +328,12 @@ const ManageEvents = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Manage Events</h1>
-              <p className="mt-2 text-gray-600">Create, edit, and manage your community events</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Manage Events</h1>
+              <p className="mt-1 md:mt-2 text-sm md:text-base text-gray-600">Create, edit, and manage your community events</p>
             </div>
-            <div className="mt-4 lg:mt-0 flex space-x-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleExportData}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-300"
@@ -368,54 +352,54 @@ const ManageEvents = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <FontAwesomeIcon icon={faCalendarAlt} className="h-8 w-8 text-green-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Events</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">{stats.total}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <FontAwesomeIcon icon={faUsers} className="h-8 w-8 text-blue-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Events</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.active}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">{stats.active}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <FontAwesomeIcon icon={faClock} className="h-8 w-8 text-yellow-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Drafts</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.draft}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">{stats.draft}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <FontAwesomeIcon icon={faCheckCircle} className="h-8 w-8 text-gray-500" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Volunteers</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats.totalVolunteers}</p>
+                <p className="text-xl md:text-2xl font-semibold text-gray-900">{stats.totalVolunteers}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1 flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
@@ -433,7 +417,7 @@ const ManageEvents = () => {
 
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
                 <FontAwesomeIcon icon={faFilter} className="h-4 w-4 mr-2" />
                 Filters
@@ -445,7 +429,7 @@ const ManageEvents = () => {
             </div>
 
             {selectedEvents.length > 0 && (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center justify-between sm:justify-end space-x-3 bg-gray-50 p-2 rounded-md sm:bg-transparent sm:p-0">
                 <span className="text-sm text-gray-600">
                   {selectedEvents.length} selected
                 </span>
@@ -467,7 +451,7 @@ const ManageEvents = () => {
 
           {showFilters && (
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status
@@ -527,8 +511,8 @@ const ManageEvents = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="flex -mb-px min-w-full">
               {[
                 { id: 'active', name: 'Active Events', count: events.active.length },
                 { id: 'draft', name: 'Drafts', count: events.draft.length },
@@ -537,7 +521,7 @@ const ManageEvents = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center py-4 px-6 text-sm font-medium border-b-2 transition duration-300 ${
+                  className={`flex items-center py-4 px-6 text-sm font-medium border-b-2 transition duration-300 whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-green-500 text-green-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -556,12 +540,53 @@ const ManageEvents = () => {
             </nav>
           </div>
 
-          <div className="p-6">
-            <div className="overflow-hidden">
+          <div className="p-4 md:p-6">
+            {/* Mobile View - Cards */}
+            <div className="block md:hidden space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedEvents.length === filteredEvents.length && filteredEvents.length > 0}
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mr-2"
+                  />
+                  <span className="text-sm text-gray-500">Select All</span>
+                </div>
+              </div>
+              
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map((event) => (
+                  <MobileEventCard
+                    key={event._id}
+                    event={event}
+                    isSelected={selectedEvents.includes(event._id)}
+                    onSelect={handleSelectEvent}
+                    onDuplicate={handleDuplicateEvent}
+                    onDelete={handleDeleteSingleEvent}
+                    onEdit={handleEditEvent}
+                    onView={handleViewEvent}
+                    getStatusBadge={getStatusBadge}
+                    getCategoryColor={getCategoryColor}
+                    getVolunteerProgress={getVolunteerProgress}
+                    formatDate={formatDate}
+                    processing={processing}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-10">
+                  <FontAwesomeIcon icon={faCalendarAlt} className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500">No events found</p>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop View - Table */}
+            <div className="hidden md:block overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead>
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
                       <input
                         type="checkbox"
                         checked={selectedEvents.length === filteredEvents.length && filteredEvents.length > 0}
@@ -633,6 +658,113 @@ const ManageEvents = () => {
               </table>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MobileEventCard = ({
+  event,
+  isSelected,
+  onSelect,
+  onDuplicate,
+  onDelete,
+  onEdit,
+  onView,
+  getStatusBadge,
+  getCategoryColor,
+  getVolunteerProgress,
+  formatDate,
+  processing
+}) => {
+  const [showActions, setShowActions] = useState(false);
+
+  return (
+    <div className={`bg-white rounded-lg border ${isSelected ? 'border-green-500 ring-1 ring-green-500' : 'border-gray-200'} shadow-sm p-4 relative`}>
+      <div className="flex justify-between items-start">
+        <div className="flex items-start space-x-3">
+           <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onSelect(event._id)}
+            className="h-5 w-5 mt-1 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          />
+          <div>
+            <div className="flex items-center flex-wrap gap-2 mb-1">
+               <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(event.category)}`}>
+                {event.category}
+              </span>
+              {getStatusBadge(event)}
+            </div>
+            <h3 className="text-base font-semibold text-gray-900">{event.title}</h3>
+            <p className="text-sm text-gray-500">{event.organization}</p>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <button
+            onClick={() => setShowActions(!showActions)}
+            className="p-2 text-gray-400 hover:text-gray-600"
+          >
+            <FontAwesomeIcon icon={faEllipsisVertical} />
+          </button>
+          
+          {showActions && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+              <div className="py-1">
+                <button
+                  onClick={() => { setShowActions(false); onView(event._id); }}
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                >
+                  <FontAwesomeIcon icon={faEye} className="h-4 w-4 mr-2" /> View
+                </button>
+                <button
+                  onClick={() => { setShowActions(false); onEdit(event._id); }}
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                >
+                  <FontAwesomeIcon icon={faEdit} className="h-4 w-4 mr-2" /> Edit
+                </button>
+                <button
+                  onClick={() => { setShowActions(false); onDuplicate(event._id); }}
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                >
+                  <FontAwesomeIcon icon={faPlus} className="h-4 w-4 mr-2" /> Duplicate
+                </button>
+                <div className="border-t border-gray-100"></div>
+                <button
+                  onClick={() => { setShowActions(false); onDelete(event._id, event.title); }}
+                  className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                >
+                  <FontAwesomeIcon icon={faTrash} className="h-4 w-4 mr-2" /> Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <div className="flex items-center text-sm text-gray-600">
+          <FontAwesomeIcon icon={faCalendarAlt} className="h-4 w-4 mr-2 text-gray-400" />
+          {formatDate(event.date)}
+        </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <FontAwesomeIcon icon={faMapMarkerAlt} className="h-4 w-4 mr-2 text-gray-400" />
+          <span className="truncate">{event.location}</span>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Volunteers</span>
+          <span>{event.volunteers || 0}/{event.maxVolunteers || 0}</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-green-500 h-2 rounded-full"
+            style={{ width: `${getVolunteerProgress(event.volunteers, event.maxVolunteers)}%` }}
+          ></div>
         </div>
       </div>
     </div>

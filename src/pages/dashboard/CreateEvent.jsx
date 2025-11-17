@@ -354,7 +354,7 @@ const CreateEvent = () => {
         visibility: "public"
       };
 
-      const eventResponse = await fetch('http://localhost:5000/api/events', {
+      const eventResponse = await fetch('https://assgn-10-seba-songjog-server.vercel.app/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
